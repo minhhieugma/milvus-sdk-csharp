@@ -12,6 +12,11 @@ namespace IO.Milvus.Client.Tests
 {
     /// <summary>
     /// a test class to execute unittest about data process
+    /// Excute order A->B->C->D: 
+    /// InsertTest: Create collection if not exist.
+    /// DeleteTest: Delete some entity.
+    /// GetCompactionStateTest
+    /// DeleteCollection
     /// </summary>
     [TestClass]
     public class DataTests : MilvusServiceClientTestsBase
@@ -100,19 +105,19 @@ namespace IO.Milvus.Client.Tests
         }
 
         [TestMethod()]
-        [DataRow(HostConfig.DefaultTestCollectionName, HostConfig.DefaultTestPartitionName)]
+        [DataRow(Book, HostConfig.DefaultTestPartitionName)]
         public void BDeleteTest(string collectionName, string partitionName)
         {
-            var r = MilvusClient.Delete(DeleteParam.Create(collectionName, $"bookIds != 0"));
+            var r = MilvusClient.Delete(DeleteParam.Create(collectionName, $"bookIds in [0,1]",partitionName));
 
             Assert.IsNotNull(r);
             Assert.IsTrue(r.Status == Param.Status.Success, r.Exception?.ToString());
-            Assert.IsTrue(r.Data.SuccIndex.Count > 0);
+            Assert.IsTrue(r.Data.IDs.IntId.Data.Count > 0);
         }
 
         [TestMethod()]
         [DataRow(Book)]
-        public void GetCompactionStateTest(string collectionName)
+        public void CGetCompactionStateTest(string collectionName)
         {
             var r = MilvusClient.ManualCompaction(collectionName);
 
@@ -122,6 +127,16 @@ namespace IO.Milvus.Client.Tests
             var stateR = MilvusClient.GetCompactionState(r.Data.CompactionID);
             Assert.IsNotNull(stateR);
             Assert.IsTrue(stateR.Status == Param.Status.Success, stateR.Exception?.ToString());
+        }
+
+        [TestMethod]
+        [DataRow(Book)]
+        public void DeleteCollection(string collectionName)
+        {
+            var r = MilvusClient.DropCollection(collectionName);
+
+            Assert.IsNotNull(r);
+            Assert.IsTrue(r.Status == Param.Status.Success, r.Exception?.ToString());
         }
     }
 }
