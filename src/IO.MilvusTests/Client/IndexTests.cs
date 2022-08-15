@@ -1,78 +1,58 @@
-﻿using IO.Milvus.Client;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using IO.MilvusTests.Client.Base;
-using IO.Milvus.Param.Dml;
-using Google.Protobuf.Collections;
-using IO.Milvus.Grpc;
-using IO.MilvusTests;
+﻿using IO.Milvus.Grpc;
 using IO.Milvus.Param.Collection;
+using IO.Milvus.Param.Dml;
+using IO.Milvus.Param.Index;
 using IO.Milvus.Param.Partition;
+using IO.MilvusTests;
+using IO.MilvusTests.Client.Base;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IO.Milvus.Client.Tests
 {
     /// <summary>
-    /// a test class to execute unittest about data process
-    /// Excute order A->B->C->D: 
-    /// InsertTest: Create collection if not exist.
-    /// DeleteTest: Delete some entity.
-    /// GetCompactionStateTest
-    /// DeleteCollection
+    /// Tests for index
+    /// <see href="https://milvus.io/docs/v2.1.x/drop_index.md"/>
     /// </summary>
     [TestClass]
-    public class DataTests : MilvusServiceClientTestsBase
+    public class IndexTests: MilvusServiceClientTestsBase
     {
-        public const string Book = nameof(Book);
+        public const string CollectionName = nameof(IndexTests);
 
-        [TestMethod()]
-        [DataRow(Book, HostConfig.DefaultTestPartitionName)]
-        public void AInsertTest(string collectionName, string partitionName)
+        [TestMethod]
+        [DataRow(CollectionName,HostConfig.DefaultTestPartitionName)]
+        public void ABuildIndexTest(string collectionName,string partitionName)
         {
             CreateCollection(collectionName);
 
-            var data = PreareData(collectionName, partitionName);
+            InsertData(collectionName, partitionName);
 
-            var hasP = MilvusClient.HasPartition(HasPartitionParam.Create(collectionName, partitionName));
-            if (!hasP.Data)
-            {
-                var createP = MilvusClient.CreatePartition(CreatePartitionParam.Create(collectionName, partitionName));
-                AssertRpcStatus(createP);
-            }
-
-            var r = MilvusClient.Insert(data);
-
-            Assert.IsNotNull(r);
-            Assert.IsTrue(r.Status == Param.Status.Success, r.Exception?.ToString());
-            Assert.IsTrue(r.Data.SuccIndex.Count > 0);
-        }
-
-        [TestMethod()]
-        [DataRow(Book, HostConfig.DefaultTestPartitionName)]
-        public void BDeleteTest(string collectionName, string partitionName)
-        {
-            var r = MilvusClient.Delete(DeleteParam.Create(collectionName, $"bookIds in [0,1]",partitionName));
+            var indexParam = CreateIndexParam.Create(
+                collectionName: collectionName,
+                fieldName: "bookIntros",
+                indexType: Milvus.Param.IndexType.IVF_FLAT,
+                metricType: Milvus.Param.MetricType.L2);
+            indexParam.ExtraParam = "{\"nlist\":1024}";
+            
+            var r = MilvusClient.CreateIndex(
+                indexParam);
 
             Assert.IsNotNull(r);
-            Assert.IsTrue(r.Status == Param.Status.Success, r.Exception?.ToString());
-            Assert.IsTrue(r.Data.IDs.IntId.Data.Count > 0);
-        }
-
-        [TestMethod()]
-        [DataRow(Book)]
-        public void CGetCompactionStateTest(string collectionName)
-        {
-            var r = MilvusClient.ManualCompaction(collectionName);
-
-            Assert.IsNotNull(r);
-            Assert.IsTrue(r.Status == Param.Status.Success, r.Exception?.ToString());
-
-            var stateR = MilvusClient.GetCompactionState(r.Data.CompactionID);
-            Assert.IsNotNull(stateR);
-            Assert.IsTrue(stateR.Status == Param.Status.Success, stateR.Exception?.ToString());
+            Assert.IsTrue(r.Status == Milvus.Param.Status.Success, r.Exception?.ToString());
         }
 
         [TestMethod]
-        [DataRow(Book)]
-        public void DeleteCollection(string collectionName)
+        [DataRow(CollectionName)]
+        public void BDropIndexTest(string collectionName)
+        {
+            var r = MilvusClient.DropIndex(DropIndexParam.Create(collectionName, "bookIntros"));
+
+            Assert.IsNotNull(r);
+            Assert.IsTrue(r.Status == Milvus.Param.Status.Success, r.Exception?.ToString());
+        }
+
+        [TestMethod]
+        [DataRow(CollectionName)]
+        public void CDeleteCollection(string collectionName)
         {
             var r = MilvusClient.DropCollection(collectionName);
 
@@ -110,6 +90,24 @@ namespace IO.Milvus.Client.Tests
                 });
 
             return insertParam;
+        }
+
+        private void InsertData(string collectionName, string partitionName)
+        {
+            var data = PreareData(collectionName, partitionName);
+
+            var hasP = MilvusClient.HasPartition(HasPartitionParam.Create(collectionName, partitionName));
+            if (!hasP.Data)
+            {
+                var createP = MilvusClient.CreatePartition(CreatePartitionParam.Create(collectionName, partitionName));
+                AssertRpcStatus(createP);
+            }
+
+            var r = MilvusClient.Insert(data);
+
+            Assert.IsNotNull(r);
+            Assert.IsTrue(r.Status == Milvus.Param.Status.Success, r.Exception?.ToString());
+            Assert.IsTrue(r.Data.SuccIndex.Count > 0);
         }
 
         private void CreateCollection(string collectionName)

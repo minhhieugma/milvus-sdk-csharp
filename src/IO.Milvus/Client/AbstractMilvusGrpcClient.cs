@@ -1221,6 +1221,7 @@ namespace IO.Milvus.Client
                 var request = new DropIndexRequest()
                 {
                     CollectionName = requestParam.CollectionName,
+                    FieldName = requestParam.FieldName,
                     IndexName = requestParam.IndexName,
                 };
 

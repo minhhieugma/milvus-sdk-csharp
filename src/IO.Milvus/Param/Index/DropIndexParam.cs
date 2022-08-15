@@ -4,12 +4,14 @@
     {
         public static DropIndexParam Create(
             string collectionName,
-            string indexName)
+            string fieldName,
+            string indexName = "")
         {
             var param = new DropIndexParam()
             {
                 CollectionName = collectionName,
-                IndexName = indexName
+                IndexName = indexName,
+                FieldName = fieldName
             };
             param.Check();
 
@@ -20,12 +22,15 @@
 
         public string IndexName { get; set; } = Constant.DEFAULT_INDEX_NAME;
 
+        public string FieldName { get; set; }
+
         internal void Check()
         {
             if (string.IsNullOrEmpty(IndexName))
             {
                 IndexName = Constant.DEFAULT_INDEX_NAME;
             }
+            ParamUtils.CheckNullEmptyString(FieldName, "Field Name");
         }
     }
 }

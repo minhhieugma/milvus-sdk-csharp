@@ -12,17 +12,17 @@ namespace IO.Milvus.Param.Index
         public static CreateIndexParam Create(
                     string collectionName,
                     string fieldName,
-                    string indexName,
                     IndexType indexType,
-                    MetricType metricType)
+                    MetricType metricType,
+                    string indexName = "")
         {
             var param = new CreateIndexParam()
             {
                 CollectionName = collectionName,
                 FieldName = fieldName,
-                IndexName = indexName,
                 IndexType = indexType,
-                MetricType = metricType
+                MetricType = metricType,
+                IndexName = indexName
             };
             param.Check();
 
@@ -61,17 +61,12 @@ namespace IO.Milvus.Param.Index
             }
         }
 
-        public string IndexName { get; set; } = Constant.DEFAULT_INDEX_NAME;
+        public string IndexName { get; set; }
 
         internal void Check()
         {
             ParamUtils.CheckNullEmptyString(CollectionName, "Collection name");
-            ParamUtils.CheckNullEmptyString(FieldName, "Field name");
-
-            if (string.IsNullOrEmpty(IndexName))
-            {
-                IndexName = Constant.DEFAULT_INDEX_NAME;
-            }
+            ParamUtils.CheckNullEmptyString(FieldName, "Field name");            
 
             if (IndexType == IndexType.INVALID)
             {
