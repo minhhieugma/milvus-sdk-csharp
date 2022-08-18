@@ -8,7 +8,7 @@ using IO.MilvusTests;
 namespace IO.Milvus.Client.Tests
 {
     [TestClass]
-    public class CollectionTest:MilvusServiceClientTestsBase
+    public class CollectionTest: MilvusServiceClientTestsBase
     {
         [TestMethod()]
         [DataRow(HostConfig.DefaultTestCollectionName, true)]

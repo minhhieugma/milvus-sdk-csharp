@@ -1,15 +1,11 @@
-﻿using IO.Milvus.Client;
-using IO.Milvus.Param.Dml;
+﻿using IO.Milvus.Param.Dml;
 using IO.MilvusTests.Client.Base;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IO.Milvus.Client.Tests
 {
+    //TODO:Add base testmethods so that it can be executed without pre-import data.
+
     [TestClass]
     public class QueryTest : MilvusServiceClientTestsBase
     {

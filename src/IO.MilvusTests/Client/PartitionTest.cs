@@ -6,8 +6,14 @@ using IO.Milvus.Param;
 
 namespace IO.Milvus.Client.Tests
 {
+    /// <summary>
+    /// Tests for partition associated.
+    /// </summary>
+    /// <remarks>
+    /// Order: A -> B -> C -> D -> E -> F -> G
+    /// </remarks>
     [TestClass()]
-    public class PartitionTest:MilvusServiceClientTestsBase
+    public class PartitionTest: MilvusServiceClientTestsBase
     {
         [TestMethod()]
         [DataRow(HostConfig.DefaultTestCollectionName,HostConfig.DefaultTestPartitionName)]

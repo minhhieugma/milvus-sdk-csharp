@@ -6,7 +6,7 @@ namespace IO.MilvusTests.Client.Base
 {
     public abstract class MilvusServiceClientTestsBase
     {
-        private static MilvusServiceClient _milvusclient;
+        private static MilvusServiceClient? _milvusclient;
 
         protected MilvusServiceClient MilvusClient { get => _milvusclient ?? (_milvusclient = DefaultClient()); }
 
@@ -60,5 +60,4 @@ namespace IO.MilvusTests.Client.Base
         }
 
     }
-
 }
